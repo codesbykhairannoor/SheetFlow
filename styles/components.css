@@ -259,7 +259,7 @@
 
 .divider::before,
 .divider::after {
-  content: '';
+  content: "";
   flex: 1;
   border-bottom: 1px solid var(--ui-kit-color-border-subtle);
 }
@@ -391,6 +391,3 @@
   font-size: 11px;
   color: var(--ui-kit-color-text-tertiary);
 }
-
-
-

@@ -112,7 +112,10 @@ async function idbRemove(key: string): Promise<void> {
 /**
  * Saves active sheet URL and full dataset across all storage layers (IndexedDB + localStorage + sessionStorage).
  */
-export async function persistActiveSheet(url: string, data: SpreadsheetData): Promise<void> {
+export async function persistActiveSheet(
+  url: string,
+  data: SpreadsheetData,
+): Promise<void> {
   const cleanUrl = url.trim();
 
   // 1. Synchronous localStorage + sessionStorage backup
@@ -164,7 +167,9 @@ export async function restoreActiveSheet(): Promise<{
   // 2. Fallback to localStorage if IndexedDB is empty
   if (!url) {
     try {
-      url = localStorage.getItem(KEY_SAVED_URL) || sessionStorage.getItem(KEY_SAVED_URL);
+      url =
+        localStorage.getItem(KEY_SAVED_URL) ||
+        sessionStorage.getItem(KEY_SAVED_URL);
       const rawData = localStorage.getItem(KEY_CACHED_DATA);
       if (rawData && !data) {
         data = JSON.parse(rawData);
@@ -176,7 +181,9 @@ export async function restoreActiveSheet(): Promise<{
 
   if (!draftUrl) {
     try {
-      draftUrl = localStorage.getItem(KEY_DRAFT_URL) || sessionStorage.getItem(KEY_DRAFT_URL);
+      draftUrl =
+        localStorage.getItem(KEY_DRAFT_URL) ||
+        sessionStorage.getItem(KEY_DRAFT_URL);
     } catch {
       // Ignore
     }
@@ -233,7 +240,9 @@ export async function addRecentSheet(entry: RecentSheetEntry): Promise<void> {
   const current = await getRecentSheets();
 
   // Deduplicate by URL
-  const filtered = current.filter((s) => s.url.toLowerCase() !== entry.url.toLowerCase());
+  const filtered = current.filter(
+    (s) => s.url.toLowerCase() !== entry.url.toLowerCase(),
+  );
   const updated = [entry, ...filtered].slice(0, 5); // Keep up to 5 most recent sheets
 
   try {
@@ -289,11 +298,12 @@ export async function isGoogleConnectedSaved(): Promise<boolean> {
     const idbVal = await idbGet<string>(KEY_GOOGLE_AUTH);
     if (idbVal === "true") return true;
 
-    const lsVal = localStorage.getItem(KEY_GOOGLE_AUTH) || sessionStorage.getItem(KEY_GOOGLE_AUTH);
+    const lsVal =
+      localStorage.getItem(KEY_GOOGLE_AUTH) ||
+      sessionStorage.getItem(KEY_GOOGLE_AUTH);
     if (lsVal === "true") return true;
   } catch {
     // Ignore
   }
   return false;
 }
-

@@ -1,4 +1,10 @@
-export type ColumnDataType = "text" | "number" | "currency" | "image_url" | "date" | "boolean";
+export type ColumnDataType =
+  | "text"
+  | "number"
+  | "currency"
+  | "image_url"
+  | "date"
+  | "boolean";
 
 export interface ColumnSchema {
   name: string;

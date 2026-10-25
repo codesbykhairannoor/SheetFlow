@@ -40,7 +40,7 @@ export const App = () => {
   // Canva SDK Hooks
   const isSupported = useFeatureSupport();
   const addElement = [addElementAtPoint, addElementAtCursor].find((fn) =>
-    isSupported(fn)
+    isSupported(fn),
   );
   const selection = useSelection("plaintext");
 
@@ -59,56 +59,53 @@ export const App = () => {
   const [isSwitchingSheet, setIsSwitchingSheet] = useState<boolean>(false);
 
   // Connect & Sync with Google Sheet URL
-  const connectUrl = useCallback(
-    async (url: string, isAutoLoad = false) => {
-      if (!url.trim()) return;
+  const connectUrl = useCallback(async (url: string, isAutoLoad = false) => {
+    if (!url.trim()) return;
 
-      if (isAutoLoad) {
-        setIsRefreshing(true);
-      } else {
-        setIsLoading(true);
+    if (isAutoLoad) {
+      setIsRefreshing(true);
+    } else {
+      setIsLoading(true);
+    }
+
+    setSyncStatus({
+      state: "fetching",
+      message: isAutoLoad
+        ? "Refreshing latest sheet data..."
+        : "Connecting to your Google Sheet...",
+    });
+
+    try {
+      const data = await fetchGoogleSheetLive(url);
+      if (data.totalRows === 0) {
+        throw new Error("Connected, but the sheet has no rows of data.");
       }
+
+      setSpreadsheet(data);
+      setGoogleSheetsUrl(url);
+
+      // Save to triple-layer storage (IndexedDB + localStorage + sessionStorage)
+      await persistActiveSheet(url, data);
+
+      // Refresh recent sheets list
+      const recents = await getRecentSheets();
+      setRecentSheets(recents);
 
       setSyncStatus({
-        state: "fetching",
+        state: "success",
         message: isAutoLoad
-          ? "Refreshing latest sheet data..."
-          : "Connecting to your Google Sheet...",
+          ? `Refreshed! Loaded ${data.totalRows} rows.`
+          : `Connected! Loaded ${data.totalRows} rows.`,
       });
-
-      try {
-        const data = await fetchGoogleSheetLive(url);
-        if (data.totalRows === 0) {
-          throw new Error("Connected, but the sheet has no rows of data.");
-        }
-
-        setSpreadsheet(data);
-        setGoogleSheetsUrl(url);
-
-        // Save to triple-layer storage (IndexedDB + localStorage + sessionStorage)
-        await persistActiveSheet(url, data);
-
-        // Refresh recent sheets list
-        const recents = await getRecentSheets();
-        setRecentSheets(recents);
-
-        setSyncStatus({
-          state: "success",
-          message: isAutoLoad
-            ? `Refreshed! Loaded ${data.totalRows} rows.`
-            : `Connected! Loaded ${data.totalRows} rows.`,
-        });
-      } catch (err: unknown) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to load Google Sheet.";
-        setSyncStatus({ state: "error", message: errorMessage });
-      } finally {
-        setIsLoading(false);
-        setIsRefreshing(false);
-      }
-    },
-    []
-  );
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to load Google Sheet.";
+      setSyncStatus({ state: "error", message: errorMessage });
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, []);
 
   // Hydrate saved URL, cached dataset, and recent sheets history on mount
   useEffect(() => {
@@ -191,7 +188,10 @@ export const App = () => {
       }
     };
     reader.onerror = () => {
-      setSyncStatus({ state: "error", message: "Failed to read the file from disk." });
+      setSyncStatus({
+        state: "error",
+        message: "Failed to read the file from disk.",
+      });
       setIsLoading(false);
     };
     reader.readAsText(file);
@@ -302,7 +302,7 @@ export const App = () => {
         selection,
         currentRow,
         spreadsheet.columns,
-        spreadsheet.rows
+        spreadsheet.rows,
       );
 
       if (updatedCount > 0) {
@@ -445,7 +445,9 @@ export const App = () => {
                   tabIndex={0}
                 >
                   <div className={styles.fileDropzoneIcon}>📁</div>
-                  <div className={styles.fileDropzoneTitle}>Upload .CSV File</div>
+                  <div className={styles.fileDropzoneTitle}>
+                    Upload .CSV File
+                  </div>
                   <div className={styles.fileDropzoneHint}>
                     Click to choose a .csv file from your computer
                   </div>
@@ -466,7 +468,9 @@ export const App = () => {
                   onClick={() => setShowRawCsvText(!showRawCsvText)}
                   stretch
                 >
-                  {showRawCsvText ? "▲ Hide text paste" : "▼ Or paste raw CSV text"}
+                  {showRawCsvText
+                    ? "▲ Hide text paste"
+                    : "▼ Or paste raw CSV text"}
                 </Button>
 
                 {showRawCsvText && (
@@ -536,7 +540,14 @@ export const App = () => {
           {/* 1. Connected Sheet Header Bar (Full Width & Clean Layout) */}
           <div className={styles.datasetCard}>
             {/* Sheet Info (Full Width, No horizontal squeeze) */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                gap: "8px",
+              }}
+            >
               <div style={{ minWidth: 0, flex: 1 }}>
                 <Text size="small" tone="tertiary">
                   Connected Sheet
@@ -562,7 +573,14 @@ export const App = () => {
             </div>
 
             {/* Action Toolbar on its own dedicated row */}
-            <div style={{ display: "flex", gap: "6px", marginTop: "8px", flexWrap: "wrap" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "6px",
+                marginTop: "8px",
+                flexWrap: "wrap",
+              }}
+            >
               <Button
                 variant="secondary"
                 size="small"

@@ -14,24 +14,30 @@ function normalizeKey(key: string): string {
  */
 export function replaceTagsInText(
   originalText: string,
-  row: Record<string, string | number | boolean | null>
+  row: Record<string, string | number | boolean | null>,
 ): { newText: string; replacedCount: number } {
   let replacedCount = 0;
   const normalizedRowMap = new Map<string, string>();
 
   for (const [key, val] of Object.entries(row)) {
-    normalizedRowMap.set(normalizeKey(key), val !== null && val !== undefined ? String(val) : "");
+    normalizedRowMap.set(
+      normalizeKey(key),
+      val !== null && val !== undefined ? String(val) : "",
+    );
   }
 
   // Regex matches {{ TagName }}
-  const newText = originalText.replace(/\{\{\s*([^{}]+?)\s*\}\}/g, (match, tag) => {
-    const normTag = normalizeKey(tag);
-    if (normalizedRowMap.has(normTag)) {
-      replacedCount++;
-      return normalizedRowMap.get(normTag) ?? "";
-    }
-    return match; // Keep as is if column not found
-  });
+  const newText = originalText.replace(
+    /\{\{\s*([^{}]+?)\s*\}\}/g,
+    (match, tag) => {
+      const normTag = normalizeKey(tag);
+      if (normalizedRowMap.has(normTag)) {
+        replacedCount++;
+        return normalizedRowMap.get(normTag) ?? "";
+      }
+      return match; // Keep as is if column not found
+    },
+  );
 
   return { newText, replacedCount };
 }
@@ -44,21 +50,28 @@ export function smartMatchAndReplace(
   originalText: string,
   targetRow: Record<string, string | number | boolean | null>,
   columns: ColumnSchema[],
-  allRows?: Array<Record<string, string | number | boolean | null>>
+  allRows?: Array<Record<string, string | number | boolean | null>>,
 ): { matched: boolean; newText: string; matchedColumn?: string } {
   const trimmed = originalText.trim();
 
   // 1. Direct Mustache Tag Match: {{ TagName }}
   let tagReplaced = false;
-  const replacedWithTags = originalText.replace(/\{\{\s*([^{}]+?)\s*\}\}/g, (match, tag) => {
-    const norm = normalizeKey(tag);
-    const col = columns.find((c) => normalizeKey(c.name) === norm);
-    if (col && targetRow[col.name] !== undefined && targetRow[col.name] !== null) {
-      tagReplaced = true;
-      return String(targetRow[col.name]);
-    }
-    return match;
-  });
+  const replacedWithTags = originalText.replace(
+    /\{\{\s*([^{}]+?)\s*\}\}/g,
+    (match, tag) => {
+      const norm = normalizeKey(tag);
+      const col = columns.find((c) => normalizeKey(c.name) === norm);
+      if (
+        col &&
+        targetRow[col.name] !== undefined &&
+        targetRow[col.name] !== null
+      ) {
+        tagReplaced = true;
+        return String(targetRow[col.name]);
+      }
+      return match;
+    },
+  );
 
   if (tagReplaced) {
     return { matched: true, newText: replacedWithTags, matchedColumn: "tags" };
@@ -69,7 +82,10 @@ export function smartMatchAndReplace(
     for (const col of columns) {
       const targetVal = String(targetRow[col.name] ?? "");
       const matchesAnyRow = allRows.some(
-        (r) => String(r[col.name] ?? "").trim().toLowerCase() === trimmed.toLowerCase()
+        (r) =>
+          String(r[col.name] ?? "")
+            .trim()
+            .toLowerCase() === trimmed.toLowerCase(),
       );
       if (matchesAnyRow) {
         return { matched: true, newText: targetVal, matchedColumn: col.name };
@@ -81,15 +97,25 @@ export function smartMatchAndReplace(
   for (const col of columns) {
     const colPrefix = col.name.toLowerCase() + ":";
     if (trimmed.toLowerCase().startsWith(colPrefix)) {
-      const rest = targetRow[col.name] !== undefined && targetRow[col.name] !== null ? String(targetRow[col.name]) : "";
-      return { matched: true, newText: `${col.name}: ${rest}`, matchedColumn: col.name };
+      const rest =
+        targetRow[col.name] !== undefined && targetRow[col.name] !== null
+          ? String(targetRow[col.name])
+          : "";
+      return {
+        matched: true,
+        newText: `${col.name}: ${rest}`,
+        matchedColumn: col.name,
+      };
     }
   }
 
   // 4. Placeholder header match (when the text is just the column name itself)
   for (const col of columns) {
     if (normalizeKey(col.name) === normalizeKey(trimmed)) {
-      const val = targetRow[col.name] !== undefined && targetRow[col.name] !== null ? String(targetRow[col.name]) : "";
+      const val =
+        targetRow[col.name] !== undefined && targetRow[col.name] !== null
+          ? String(targetRow[col.name])
+          : "";
       return { matched: true, newText: val, matchedColumn: col.name };
     }
   }
@@ -101,10 +127,16 @@ export function smartMatchAndReplace(
  * Updates all selected text elements simultaneously using intelligent column matching.
  */
 export async function smartUpdateAllSelected(
-  selection: { count: number; read: () => Promise<{ contents: ReadonlyArray<{ text: string }>; save: () => Promise<void> }> },
+  selection: {
+    count: number;
+    read: () => Promise<{
+      contents: ReadonlyArray<{ text: string }>;
+      save: () => Promise<void>;
+    }>;
+  },
   targetRow: Record<string, string | number | boolean | null>,
   columns: ColumnSchema[],
-  allRows?: Array<Record<string, string | number | boolean | null>>
+  allRows?: Array<Record<string, string | number | boolean | null>>,
 ): Promise<{ updatedCount: number; matchedColumns: string[] }> {
   if (selection.count === 0) {
     return { updatedCount: 0, matchedColumns: [] };
@@ -119,7 +151,10 @@ export async function smartUpdateAllSelected(
     if (result.matched && result.newText !== item.text) {
       item.text = result.newText;
       updatedCount++;
-      if (result.matchedColumn && !matchedColumns.includes(result.matchedColumn)) {
+      if (
+        result.matchedColumn &&
+        !matchedColumns.includes(result.matchedColumn)
+      ) {
         matchedColumns.push(result.matchedColumn);
       }
     }
@@ -137,7 +172,7 @@ export async function smartUpdateAllSelected(
  */
 export async function insertTemplateTagsToCanvas(
   addElementFn: (element: ElementAtCursor) => Promise<void>,
-  columns: ColumnSchema[]
+  columns: ColumnSchema[],
 ): Promise<void> {
   for (const col of columns) {
     await addElementFn({
@@ -153,7 +188,7 @@ export async function insertTemplateTagsToCanvas(
 export async function insertTagToCanvas(
   addElementFn: (element: ElementAtCursor) => Promise<void>,
   columnName: string,
-  sampleValue?: string
+  sampleValue?: string,
 ): Promise<void> {
   const displaySample = sampleValue ? ` (${sampleValue})` : "";
   await addElementFn({
@@ -167,7 +202,7 @@ export async function insertTagToCanvas(
  */
 export async function insertCustomTextToCanvas(
   addElementFn: (element: ElementAtCursor) => Promise<void>,
-  content: string
+  content: string,
 ): Promise<void> {
   await addElementFn({
     type: "text",
@@ -181,7 +216,7 @@ export async function insertCustomTextToCanvas(
 export async function uploadAndInsertImage(
   addElementFn: (element: ElementAtCursor) => Promise<void>,
   imageUrl: string,
-  altText?: string
+  altText?: string,
 ): Promise<boolean> {
   try {
     const queued = await upload({
@@ -213,8 +248,14 @@ export async function uploadAndInsertImage(
  */
 export async function applyValueToCanvas(
   value: string,
-  selection: { count: number; read: () => Promise<{ contents: ReadonlyArray<{ text: string }>; save: () => Promise<void> }> },
-  addElementFn?: (element: ElementAtCursor) => Promise<void>
+  selection: {
+    count: number;
+    read: () => Promise<{
+      contents: ReadonlyArray<{ text: string }>;
+      save: () => Promise<void>;
+    }>;
+  },
+  addElementFn?: (element: ElementAtCursor) => Promise<void>,
 ): Promise<"replaced" | "inserted" | "failed"> {
   if (selection.count > 0) {
     try {
@@ -251,7 +292,7 @@ export async function applyValueToCanvas(
 export async function insertCompleteRowCard(
   addElementFn: (element: any) => Promise<void>,
   row: Record<string, string | number | boolean | null>,
-  columns: ColumnSchema[]
+  columns: ColumnSchema[],
 ): Promise<void> {
   const startTop = 80;
   const startLeft = 80;
@@ -260,14 +301,21 @@ export async function insertCompleteRowCard(
   let visualIndex = 0;
   for (const col of columns) {
     const rawVal = row[col.name];
-    if (rawVal === null || rawVal === undefined || String(rawVal).trim() === "") {
+    if (
+      rawVal === null ||
+      rawVal === undefined ||
+      String(rawVal).trim() === ""
+    ) {
       continue;
     }
 
     const valStr = String(rawVal).trim();
 
     // Check if it's an image
-    if (col.type === "image_url" || /^https?:\/\/.*\.(?:png|jpg|jpeg|webp)/i.test(valStr)) {
+    if (
+      col.type === "image_url" ||
+      /^https?:\/\/.*\.(?:png|jpg|jpeg|webp)/i.test(valStr)
+    ) {
       await uploadAndInsertImage(addElementFn, valStr, col.name);
       continue;
     }

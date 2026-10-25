@@ -28,7 +28,9 @@ describe("SheetSync App Tests", () => {
     renderInTestProvider(<App />);
 
     expect(screen.getByText("SheetFlow")).toBeDefined();
-    expect(screen.getByText("Connect your spreadsheet to start:")).toBeDefined();
+    expect(
+      screen.getByText("Connect your spreadsheet to start:"),
+    ).toBeDefined();
     expect(screen.getByText("Connect Google Sheet")).toBeDefined();
   });
 

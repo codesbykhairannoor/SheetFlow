@@ -1,5 +1,9 @@
 import Papa from "papaparse";
-import type { ColumnDataType, ColumnSchema, SpreadsheetData } from "../types/sheetsync";
+import type {
+  ColumnDataType,
+  ColumnSchema,
+  SpreadsheetData,
+} from "../types/sheetsync";
 
 /**
  * Extracts candidate URLs for fetching the Google Sheet as CSV.
@@ -39,14 +43,22 @@ export function getGoogleSheetsCandidateUrls(rawUrl: string): string[] {
 
   // If user provided a specific gid in their URL, try that specific gid first
   if (gid !== null) {
-    candidates.push(`https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`);
-    candidates.push(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&gid=${gid}`);
+    candidates.push(
+      `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`,
+    );
+    candidates.push(
+      `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&gid=${gid}`,
+    );
   }
 
   // Next, try without any gid. Google defaults to the first active sheet!
   // This prevents the dreaded HTTP 400 error caused by requesting non-existent gid=0.
-  candidates.push(`https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`);
-  candidates.push(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv`);
+  candidates.push(
+    `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`,
+  );
+  candidates.push(
+    `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv`,
+  );
 
   return candidates;
 }
@@ -54,7 +66,9 @@ export function getGoogleSheetsCandidateUrls(rawUrl: string): string[] {
 /**
  * Backward compatibility helper.
  */
-export function convertGoogleSheetsUrlToCsvExport(rawUrl: string): string | null {
+export function convertGoogleSheetsUrlToCsvExport(
+  rawUrl: string,
+): string | null {
   const candidates = getGoogleSheetsCandidateUrls(rawUrl);
   return candidates.length > 0 && candidates[0] ? candidates[0] : null;
 }
@@ -63,7 +77,9 @@ export function convertGoogleSheetsUrlToCsvExport(rawUrl: string): string | null
  * Detects the data type of a column based on its sample values.
  */
 function inferColumnType(values: unknown[]): ColumnDataType {
-  const nonNullValues = values.filter((v) => v !== null && v !== undefined && String(v).trim() !== "");
+  const nonNullValues = values.filter(
+    (v) => v !== null && v !== undefined && String(v).trim() !== "",
+  );
   if (nonNullValues.length === 0) return "text";
 
   const sample = String(nonNullValues[0]).trim();
@@ -88,13 +104,18 @@ function inferColumnType(values: unknown[]): ColumnDataType {
   }
 
   // Number check
-  const isAllNumbers = nonNullValues.slice(0, 5).every((v) => !isNaN(Number(String(v).replace(/,/g, ""))));
+  const isAllNumbers = nonNullValues
+    .slice(0, 5)
+    .every((v) => !isNaN(Number(String(v).replace(/,/g, ""))));
   if (isAllNumbers) {
     return "number";
   }
 
   // Date check
-  if (!isNaN(Date.parse(sample)) && (sample.includes("-") || sample.includes("/"))) {
+  if (
+    !isNaN(Date.parse(sample)) &&
+    (sample.includes("-") || sample.includes("/"))
+  ) {
     return "date";
   }
 
@@ -108,26 +129,34 @@ export function parseCsvText(
   csvText: string,
   title: string,
   sourceType: "google_sheets" | "csv_raw" | "preset",
-  sourceUrl?: string
+  sourceUrl?: string,
 ): SpreadsheetData {
-  const result = Papa.parse<Record<string, string | number | boolean | null>>(csvText, {
-    header: true,
-    dynamicTyping: true,
-    skipEmptyLines: true,
-  });
+  const result = Papa.parse<Record<string, string | number | boolean | null>>(
+    csvText,
+    {
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+    },
+  );
 
-  const rawRows = result.data.filter((row) => Object.values(row).some((val) => val !== null && val !== ""));
+  const rawRows = result.data.filter((row) =>
+    Object.values(row).some((val) => val !== null && val !== ""),
+  );
   const firstRow = rawRows[0];
-  const allHeaders = result.meta.fields || (firstRow ? Object.keys(firstRow) : []);
+  const allHeaders =
+    result.meta.fields || (firstRow ? Object.keys(firstRow) : []);
   // Filter out empty or phantom columns from Google Sheets
   const validHeaders = allHeaders.filter(
-    (colName) => colName && colName.trim() !== "" && !colName.startsWith("_")
+    (colName) => colName && colName.trim() !== "" && !colName.startsWith("_"),
   );
 
   const columns: ColumnSchema[] = validHeaders.map((colName) => {
     const colValues = rawRows.map((r) => r[colName]);
     const inferredType = inferColumnType(colValues);
-    const firstVal = colValues.find((v) => v !== null && v !== undefined && String(v).trim() !== "");
+    const firstVal = colValues.find(
+      (v) => v !== null && v !== undefined && String(v).trim() !== "",
+    );
     return {
       name: colName,
       type: inferredType,
@@ -151,7 +180,10 @@ export function parseCsvText(
  * If an OAuth accessToken is provided, tries Google Sheets API v4 first (supporting private sheets),
  * then falls back to public CSV export.
  */
-export async function fetchGoogleSheetLive(sheetUrl: string, accessToken?: string): Promise<SpreadsheetData> {
+export async function fetchGoogleSheetLive(
+  sheetUrl: string,
+  accessToken?: string,
+): Promise<SpreadsheetData> {
   const trimmed = sheetUrl.trim().replace(/^["']|["']$/g, "");
 
   // Extract Sheet ID
@@ -173,8 +205,17 @@ export async function fetchGoogleSheetLive(sheetUrl: string, accessToken?: strin
       });
       if (driveRes.ok) {
         const csvText = await driveRes.text();
-        if (csvText && !csvText.trim().startsWith("<!DOCTYPE html") && !csvText.includes("<html")) {
-          return parseCsvText(csvText, "Google Sheet Live Sync", "google_sheets", sheetUrl);
+        if (
+          csvText &&
+          !csvText.trim().startsWith("<!DOCTYPE html") &&
+          !csvText.includes("<html")
+        ) {
+          return parseCsvText(
+            csvText,
+            "Google Sheet Live Sync",
+            "google_sheets",
+            sheetUrl,
+          );
         }
       }
     } catch {
@@ -193,12 +234,14 @@ export async function fetchGoogleSheetLive(sheetUrl: string, accessToken?: strin
 
       if (metaRes.ok) {
         const metaJson = await metaRes.json();
-        const sheetTitle = metaJson.properties?.title || "Google Sheet Live Sync";
-        const firstSheetName = metaJson.sheets?.[0]?.properties?.title || "Sheet1";
+        const sheetTitle =
+          metaJson.properties?.title || "Google Sheet Live Sync";
+        const firstSheetName =
+          metaJson.sheets?.[0]?.properties?.title || "Sheet1";
 
         // Step 2: Fetch cell values using the official Google Sheets API values endpoint
         const valuesUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(
-          firstSheetName
+          firstSheetName,
         )}!A1:ZZ1000?valueRenderOption=FORMATTED_VALUE`;
         const valuesRes = await fetch(valuesUrl, {
           headers: {
@@ -211,8 +254,12 @@ export async function fetchGoogleSheetLive(sheetUrl: string, accessToken?: strin
           const rawValues: unknown[][] = valuesJson.values || [];
 
           if (rawValues.length >= 2) {
-            const rawHeaders = (rawValues[0] || []).map((h) => String(h ?? "").trim());
-            const validHeaders = rawHeaders.filter((h) => h !== "" && !h.startsWith("_"));
+            const rawHeaders = (rawValues[0] || []).map((h) =>
+              String(h ?? "").trim(),
+            );
+            const validHeaders = rawHeaders.filter(
+              (h) => h !== "" && !h.startsWith("_"),
+            );
 
             const rows: Array<Record<string, string>> = [];
             for (let i = 1; i < rawValues.length; i++) {
@@ -235,7 +282,10 @@ export async function fetchGoogleSheetLive(sheetUrl: string, accessToken?: strin
               const columns: ColumnSchema[] = validHeaders.map((colName) => {
                 const colValues = rows.map((r) => r[colName]);
                 const inferredType = inferColumnType(colValues);
-                const firstVal = colValues.find((v) => v !== null && v !== undefined && String(v).trim() !== "");
+                const firstVal = colValues.find(
+                  (v) =>
+                    v !== null && v !== undefined && String(v).trim() !== "",
+                );
                 return {
                   name: colName,
                   type: inferredType,
@@ -264,7 +314,9 @@ export async function fetchGoogleSheetLive(sheetUrl: string, accessToken?: strin
   // 2. Standard Public / Shared Link CSV Export Flow
   const candidateUrls = getGoogleSheetsCandidateUrls(sheetUrl);
   if (candidateUrls.length === 0) {
-    throw new Error("Invalid Google Sheets link. Please provide a full Google Sheets URL or valid Sheet ID.");
+    throw new Error(
+      "Invalid Google Sheets link. Please provide a full Google Sheets URL or valid Sheet ID.",
+    );
   }
 
   let successfulCsv: string | null = null;
@@ -281,7 +333,11 @@ export async function fetchGoogleSheetLive(sheetUrl: string, accessToken?: strin
       if (response.ok) {
         const text = await response.text();
         // Check if response is actually CSV content and not an HTML login/consent wall
-        if (text && !text.trim().startsWith("<!DOCTYPE html") && !text.includes("<html")) {
+        if (
+          text &&
+          !text.trim().startsWith("<!DOCTYPE html") &&
+          !text.includes("<html")
+        ) {
           successfulCsv = text;
           break;
         }
@@ -294,20 +350,25 @@ export async function fetchGoogleSheetLive(sheetUrl: string, accessToken?: strin
   if (!successfulCsv) {
     if (lastStatus === 400) {
       throw new Error(
-        "Could not load sheet (HTTP 400). Please check that the sheet has data and sharing is set to 'Anyone with the link can view'."
+        "Could not load sheet (HTTP 400). Please check that the sheet has data and sharing is set to 'Anyone with the link can view'.",
       );
     }
     if (lastStatus === 403 || lastStatus === 401) {
       throw new Error(
-        "Access denied. In Google Sheets, click Share > set General access to 'Anyone with the link' (Viewer)."
+        "Access denied. In Google Sheets, click Share > set General access to 'Anyone with the link' (Viewer).",
       );
     }
     throw new Error(
-      "Could not load spreadsheet. In Google Sheets, click Share > set General access to 'Anyone with the link' (Viewer)."
+      "Could not load spreadsheet. In Google Sheets, click Share > set General access to 'Anyone with the link' (Viewer).",
     );
   }
 
-  return parseCsvText(successfulCsv, "Google Sheet Live Sync", "google_sheets", sheetUrl);
+  return parseCsvText(
+    successfulCsv,
+    "Google Sheet Live Sync",
+    "google_sheets",
+    sheetUrl,
+  );
 }
 
 export interface GoogleDriveSpreadsheet {
@@ -326,10 +387,12 @@ export interface DriveFetchResult {
 /**
  * Fetches recent Google Sheets from user's Google Drive via OAuth token.
  */
-export async function fetchUserSpreadsheetsFromDrive(accessToken: string): Promise<DriveFetchResult> {
+export async function fetchUserSpreadsheetsFromDrive(
+  accessToken: string,
+): Promise<DriveFetchResult> {
   try {
     const q = encodeURIComponent(
-      "mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false"
+      "mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false",
     );
     const url = `https://www.googleapis.com/drive/v3/files?q=${q}&orderBy=modifiedTime%20desc&pageSize=30&fields=files(id%2Cname%2CmodifiedTime)`;
     const res = await fetch(url, {
@@ -341,31 +404,53 @@ export async function fetchUserSpreadsheetsFromDrive(accessToken: string): Promi
     if (!res.ok) {
       const errJson = await res.json().catch(() => null);
       const errMsg = String(errJson?.error?.message || "");
-      const reason = String(errJson?.error?.errors?.[0]?.reason || errJson?.error?.details?.[0]?.reason || "");
+      const reason = String(
+        errJson?.error?.errors?.[0]?.reason ||
+          errJson?.error?.details?.[0]?.reason ||
+          "",
+      );
 
-      if (errMsg.includes("has not been used") || errMsg.includes("disabled") || reason === "SERVICE_DISABLED") {
+      if (
+        errMsg.includes("has not been used") ||
+        errMsg.includes("disabled") ||
+        reason === "SERVICE_DISABLED"
+      ) {
         return { files: [], error: "api_disabled", errorMessage: errMsg };
       }
-      if (res.status === 403 || errMsg.includes("insufficient") || reason === "ACCESS_TOKEN_SCOPE_INSUFFICIENT" || reason === "insufficientPermissions") {
-        return { files: [], error: "insufficient_scope", errorMessage: errMsg || "Drive scope not granted" };
+      if (
+        res.status === 403 ||
+        errMsg.includes("insufficient") ||
+        reason === "ACCESS_TOKEN_SCOPE_INSUFFICIENT" ||
+        reason === "insufficientPermissions"
+      ) {
+        return {
+          files: [],
+          error: "insufficient_scope",
+          errorMessage: errMsg || "Drive scope not granted",
+        };
       }
-      return { files: [], error: "other", errorMessage: errMsg || `HTTP ${res.status}` };
+      return {
+        files: [],
+        error: "other",
+        errorMessage: errMsg || `HTTP ${res.status}`,
+      };
     }
 
     const data = await res.json();
-    let rawFiles: Array<{ id: string; name?: string; modifiedTime?: string }> = data.files || [];
+    let rawFiles: Array<{ id: string; name?: string; modifiedTime?: string }> =
+      data.files || [];
 
     // Fallback: If 0 files found in My Drive, check if there are shared sheets
     if (rawFiles.length === 0) {
       try {
         const sharedQ = encodeURIComponent(
-          "mimeType = 'application/vnd.google-apps.spreadsheet' and sharedWithMe = true and trashed = false"
+          "mimeType = 'application/vnd.google-apps.spreadsheet' and sharedWithMe = true and trashed = false",
         );
         const sharedRes = await fetch(
           `https://www.googleapis.com/drive/v3/files?q=${sharedQ}&orderBy=modifiedTime%20desc&pageSize=30&fields=files(id%2Cname%2CmodifiedTime)`,
           {
             headers: { Authorization: `Bearer ${accessToken}` },
-          }
+          },
         );
         if (sharedRes.ok) {
           const sharedData = await sharedRes.json();
@@ -391,15 +476,18 @@ export async function fetchUserSpreadsheetsFromDrive(accessToken: string): Promi
   }
 }
 
-
 // ---------------------------------------------------------------------------
 // Demo Presets: Optional Backups
 // ---------------------------------------------------------------------------
 
-export const DEMO_PRESETS: Record<string, { title: string; description: string; csv: string }> = {
+export const DEMO_PRESETS: Record<
+  string,
+  { title: string; description: string; csv: string }
+> = {
   ecommerce: {
     title: "E-Commerce Flash Sale",
-    description: "Product catalog with prices, stock, discount badges, and image links",
+    description:
+      "Product catalog with prices, stock, discount badges, and image links",
     csv: `Product Title,Original Price,Sale Price,Discount,Stock Status,Rating,Badge Text,Product Image
 "Minimalist Ceramic Vase",$48.00,$29.00,"40% OFF","In Stock","4.9 / 5","BESTSELLER","https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=600"
 "Nordic Ergonomic Desk Lamp",$85.00,$55.00,"35% OFF","Only 3 Left","4.8 / 5","FLASH SALE","https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600"
