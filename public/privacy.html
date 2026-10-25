@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy | SheetFlow</title>
+  <meta name="description" content="Privacy Policy for SheetFlow explaining our zero-server data processing, client-side execution, and Google Sheets privacy standards.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/png" href="assets/sheetflow-app-icon.png">
+</head>
+<body>
+
+  <!-- Site Navigation Header -->
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="index.html" class="brand-link" aria-label="SheetFlow Home">
+        <img src="assets/sheetflow-app-icon.png" alt="SheetFlow Logo" class="brand-icon" width="32" height="32">
+        <span>SheetFlow</span>
+      </a>
+
+      <nav aria-label="Main Navigation">
+        <ul class="nav-menu">
+          <li><a href="index.html#simulator" class="nav-link">Live Demo</a></li>
+          <li><a href="index.html#how-it-works" class="nav-link">Architecture</a></li>
+          <li><a href="index.html#privacy-guarantee" class="nav-link">Data Integrity</a></li>
+          <li><a href="terms.html" class="nav-link">Terms</a></li>
+          <li><a href="privacy.html" class="nav-link active">Privacy</a></li>
+          <li><a href="support.html" class="nav-link">Support</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="https://www.canva.com/apps" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+          Open in Canva
+        </a>
+        <button type="button" class="mobile-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="legal-wrapper">
+    <div class="container">
+      
+      <!-- Page Header -->
+      <div class="legal-header">
+        <div class="badge badge-cyan">Privacy Standards</div>
+        <h1 style="font-size: clamp(2rem, 3.5vw, 2.75rem); margin-top: 0.5rem;">Privacy Policy</h1>
+        <div class="legal-meta">
+          <span>Effective Date: October 24, 2026</span>
+          <span>Version: 1.0</span>
+          <span>Standard: Zero-Server Persistence</span>
+        </div>
+      </div>
+
+      <!-- Legal Layout: Sidebar TOC + Content Sections -->
+      <div class="legal-layout">
+        
+        <!-- Table of Contents -->
+        <aside class="legal-nav" aria-label="Table of Contents">
+          <div class="legal-nav-title">Sections Outline</div>
+          <ul class="legal-nav-list">
+            <li><a href="#section-1" class="legal-nav-link active">1. Core Principles</a></li>
+            <li><a href="#section-2" class="legal-nav-link">2. Information We Access</a></li>
+            <li><a href="#section-3" class="legal-nav-link">3. Client-Side Execution</a></li>
+            <li><a href="#section-4" class="legal-nav-link">4. Third-Party Disclosures</a></li>
+            <li><a href="#section-5" class="legal-nav-link">5. Data Retention & Cookies</a></li>
+            <li><a href="#section-6" class="legal-nav-link">6. User Rights & Contact</a></li>
+          </ul>
+        </aside>
+
+        <!-- Document Content -->
+        <article class="legal-content">
+          
+          <!-- Section 1 -->
+          <section id="section-1" class="legal-section">
+            <h2>
+              <span class="section-pill">SECTION 01</span>
+              Overview and Core Privacy Principles
+            </h2>
+            <p>
+              SheetFlow ("we", "us", or "our") respects your privacy and is committed to protecting your personal and business data. This Privacy Policy outlines our strict data handling protocols when you use the SheetFlow application inside the Canva design platform.
+            </p>
+            <p>
+              Unlike traditional SaaS software that syncs your databases to external cloud servers, SheetFlow operates on a fundamental architectural principle: <strong>Zero Server Data Storage</strong>. We do not store, copy, analyze, sell, or retain any spreadsheet data you import into our Canva integration.
+            </p>
+            <div class="legal-callout">
+              <p>
+                <strong>The Core Commitment:</strong> Your spreadsheets belong to you. SheetFlow functions as an in-browser bridge between Google Sheets and Canva, never storing your records on external databases.
+              </p>
+            </div>
+          </section>
+
+          <!-- Section 2 -->
+          <section id="section-2" class="legal-section">
+            <h2>
+              <span class="section-pill">SECTION 02</span>
+              Information We Access and How It Is Used
+            </h2>
+            <p>
+              When you use SheetFlow, the application interacts with minimal technical parameters strictly required to render your designs:
+            </p>
+            <ul>
+              <li><strong>Google Spreadsheet Link:</strong> You provide the sharing URL of your publicly viewable or web-published Google Sheet. SheetFlow parses the document identifier to fetch public CSV data directly.</li>
+              <li><strong>Tabular Cell Records:</strong> Column names, header labels, text strings, dates, and numbers present in your sheet are read into volatile memory (RAM) in your web browser.</li>
+              <li><strong>Canva Design State:</strong> Through the Canva Apps SDK, SheetFlow detects active text elements on your canvas so you can map sheet tags to those design components.</li>
+            </ul>
+            <p>
+              <strong>Information We Do NOT Collect:</strong> We do not collect your Google account password, Google Drive root directory access, personal biometric data, payment information, or contact address books.
+            </p>
+          </section>
+
+          <!-- Section 3 -->
+          <section id="section-3" class="legal-section">
+            <h2>
+              <span class="section-pill">SECTION 03</span>
+              Client-Side Processing Architecture
+            </h2>
+            <p>
+              SheetFlow's technical design isolates data handling within your device:
+            </p>
+            <ul>
+              <li><strong>Browser-Level Ingestion:</strong> All CSV parsing, column mapping, and text substitution execute in your local browser sandbox within the Canva iframe container.</li>
+              <li><strong>No Relay Databases:</strong> Spreadsheet rows are never transmitted to a SheetFlow proxy server or third-party marketing warehouse. The data stream connects directly from Google's content delivery endpoints to your local Canva session.</li>
+              <li><strong>Session Volatility:</strong> When you reload your browser, navigate away from your Canva design, or close the editor tab, all temporarily cached spreadsheet rows are automatically flushed from local memory.</li>
+            </ul>
+            <div class="legal-callout">
+              <p>
+                <strong>Summary:</strong> Because your data is processed locally in real time, there is no remote database that could be compromised or leaked.
+              </p>
+            </div>
+          </section>
+
+          <!-- Section 4 -->
+          <section id="section-4" class="legal-section">
+            <h2>
+              <span class="section-pill">SECTION 04</span>
+              Third-Party Ecosystem Disclosures (Canva and Google)
+            </h2>
+            <p>
+              SheetFlow interfaces with two prominent cloud platforms. Each platform governs its own data handling:
+            </p>
+            <ul>
+              <li><strong>Canva Apps Environment:</strong> SheetFlow operates subject to the Canva Developer Terms and Canva Privacy Policy. Text inserted onto your canvas becomes part of your Canva design document, governed by Canva's data protection rules.</li>
+              <li><strong>Google API & CSV Access:</strong> SheetFlow's use of information received from Google APIs adheres to the <strong>Google API Services User Data Policy</strong>, including the Limited Use requirements. We do not use Google user data to develop, train, or improve machine learning or AI models.</li>
+              <li><strong>No Third-Party Ad Brokers:</strong> We do not partner with data brokers, ad networks, or user profiling vendors.</li>
+            </ul>
+          </section>
+
+          <!-- Section 5 -->
+          <section id="section-5" class="legal-section">
+            <h2>
+              <span class="section-pill">SECTION 05</span>
+              Data Retention, Cookies, and Analytics
+            </h2>
+            <p>
+              We prioritize transparency regarding tracking technologies and operational telemetry:
+            </p>
+            <ul>
+              <li><strong>Zero Cookies:</strong> SheetFlow does not plant tracking cookies, flash cookies, or canvas fingerprinting scripts in your browser.</li>
+              <li><strong>Zero Behavioral Advertising:</strong> We do not track your browsing activities across other tabs or websites.</li>
+              <li><strong>Basic Operational Telemetry:</strong> Standard diagnostic data (such as anonymized error reports or Canva SDK version checks) may be recorded by Canva's underlying app delivery platform to ensure software reliability, consistent with Canva's developer documentation.</li>
+              <li><strong>Data Retention Period:</strong> Zero days. Spreadsheet cell data is retained for zero seconds beyond the duration of your active Canva design session.</li>
+            </ul>
+          </section>
+
+          <!-- Section 6 -->
+          <section id="section-6" class="legal-section">
+            <h2>
+              <span class="section-pill">SECTION 06</span>
+              User Rights, Security Measures, and Contact Details
+            </h2>
+            <p>
+              Depending on your jurisdiction (such as the European Union under GDPR or California under CCPA), you possess specific rights regarding personal data:
+            </p>
+            <ul>
+              <li><strong>Right of Access & Portability:</strong> Because we do not store your data on servers, we hold no persistent database of your personal information to inspect or export. Your data remains in your original Google Sheet.</li>
+              <li><strong>Right to Erasure:</strong> To erase all data processed by SheetFlow, simply close your Canva editor tab or remove the app from your Canva workspace. The local memory state is instantly eliminated.</li>
+              <li><strong>Security Measures:</strong> All network communication between Google Sheets and Canva occurs over encrypted Transport Layer Security (TLS 1.2 or TLS 1.3) with HTTPS enforcement.</li>
+            </ul>
+            <p>
+              <strong>Contact Our Privacy Team:</strong> If you have any inquiries, audit requests, or questions regarding this Privacy Policy, please contact our data compliance coordinator:
+            </p>
+            <div class="legal-callout">
+              <p>
+                <strong>Email:</strong> support.sheetflow@gmail.com<br>
+                <strong>Direct Help Center:</strong> <a href="support.html" style="color: var(--accent-green); font-weight: 600;">Contact Support</a>
+              </p>
+            </div>
+          </section>
+
+        </article>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <img src="assets/sheetflow-app-icon.png" alt="SheetFlow Logo" width="28" height="28">
+          <span>SheetFlow</span>
+        </div>
+        <ul class="footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="terms.html">Terms and Conditions</a></li>
+          <li><a href="privacy.html">Privacy Policy</a></li>
+          <li><a href="support.html">Support Center</a></li>
+          <li><a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+        </ul>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; 2026 SheetFlow. Independent application built for the Canva platform.</span>
+        <span>Canva is a trademark of Canva Pty Ltd. Google Sheets is a trademark of Google LLC.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

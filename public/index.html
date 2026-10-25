@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SheetFlow | Connect Google Sheets to Canva Designs</title>
+  <meta name="description" content="SheetFlow connects your Google Sheets data directly to Canva designs. Sync rows, map template tags, and populate visual cards with client-side execution.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/png" href="assets/sheetflow-app-icon.png">
+</head>
+<body>
+
+  <!-- Site Navigation Header -->
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="index.html" class="brand-link" aria-label="SheetFlow Home">
+        <img src="assets/sheetflow-app-icon.png" alt="SheetFlow Logo" class="brand-icon" width="32" height="32">
+        <span>SheetFlow</span>
+      </a>
+
+      <nav aria-label="Main Navigation">
+        <ul class="nav-menu">
+          <li><a href="#simulator" class="nav-link">Live Demo</a></li>
+          <li><a href="#how-it-works" class="nav-link">Architecture</a></li>
+          <li><a href="#privacy-guarantee" class="nav-link">Data Integrity</a></li>
+          <li><a href="terms.html" class="nav-link">Terms</a></li>
+          <li><a href="privacy.html" class="nav-link">Privacy</a></li>
+          <li><a href="support.html" class="nav-link">Support</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="https://www.canva.com/apps" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+          Open in Canva
+        </a>
+        <button type="button" class="mobile-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Anti-Mainstream Hero Section -->
+    <section class="hero-section">
+      <div class="container hero-grid">
+        
+        <!-- Left Column: Editorial Statement & Technical Specs -->
+        <div class="hero-content">
+          <div class="badge badge-green">Client-Side Canva App</div>
+          
+          <h1 class="hero-title">
+            Connect tabular sheets directly to your <span class="gradient-text">design workflow</span>
+          </h1>
+
+          <p class="hero-desc">
+            Map columns from your Google Sheets directly into template text elements. Navigate records row by row, update appointment cards, certificates, and badges in real time, all without storing your spreadsheet data on external servers.
+          </p>
+
+          <div class="hero-actions">
+            <a href="https://www.canva.com/apps" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+              Install App on Canva
+            </a>
+            <a href="#how-it-works" class="btn btn-secondary">
+              Explore Data Flow
+            </a>
+          </div>
+
+          <!-- Live Privacy & Telemetry Attributes -->
+          <div class="hero-telemetry">
+            <div class="telemetry-item">
+              <span class="telemetry-label">Storage Architecture</span>
+              <span class="telemetry-value">0 Server Records</span>
+            </div>
+            <div class="telemetry-item">
+              <span class="telemetry-label">Execution Environment</span>
+              <span class="telemetry-value">Client Browser</span>
+            </div>
+            <div class="telemetry-item">
+              <span class="telemetry-label">Data Ingestion</span>
+              <span class="telemetry-value">Google Sheets CSV</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Live Interactive Simulator -->
+        <div class="simulator-wrapper" id="simulator">
+          <div class="simulator-card" id="sheetflow-simulator">
+            <div class="simulator-header">
+              <div class="simulator-title">
+                <span class="status-dot"></span>
+                <span>SIMULATOR: REALTIME MAPPING</span>
+              </div>
+              <div class="dataset-switcher" id="dataset-chips">
+                <!-- Injected via JavaScript -->
+              </div>
+            </div>
+
+            <div class="simulator-body">
+              <!-- Raw Table Preview -->
+              <div class="table-preview-wrap">
+                <table class="sheet-table">
+                  <thead id="table-head"></thead>
+                  <tbody id="table-body"></tbody>
+                </table>
+              </div>
+
+              <!-- Row Navigator -->
+              <div class="stepper-bar">
+                <span id="row-counter">Row 1 of 3</span>
+                <div class="step-nav">
+                  <button type="button" class="step-btn" id="prev-step-btn" aria-label="Previous record">&lt;</button>
+                  <button type="button" class="step-btn" id="next-step-btn" aria-label="Next record">&gt;</button>
+                </div>
+              </div>
+
+              <!-- Live Rendered Result in Design Card -->
+              <div class="canvas-result" id="canvas-preview" aria-live="polite">
+                <!-- Dynamic template content rendered by JavaScript -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Section: Workflow Architecture -->
+    <section class="section" id="how-it-works">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-kicker">Operational Model</div>
+          <h2 class="section-title">How SheetFlow processes your data</h2>
+          <p>A transparent three-step pipeline running entirely inside your Canva session.</p>
+        </div>
+
+        <div class="workflow-track">
+          <div class="workflow-node">
+            <div class="node-number">01</div>
+            <h3>Provide Sheet URL</h3>
+            <p>Paste the sharing link of your public or published Google Sheet. SheetFlow extracts the Document ID and accesses the live CSV export directly via Google endpoints.</p>
+          </div>
+
+          <div class="workflow-node">
+            <div class="node-number">02</div>
+            <h3>Automatic Column Parsing</h3>
+            <p>SheetFlow identifies your header row and generates dynamic field tags for each column, such as Name, Date, Clinic, or Status, ready for one-click insertion.</p>
+          </div>
+
+          <div class="workflow-node">
+            <div class="node-number">03</div>
+            <h3>Direct Canvas Synchronization</h3>
+            <p>Step through your records with the row navigator. Each step pushes data directly into Canva text layers using the official Canva Apps SDK APIs.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section: Visual Showcase Gallery -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-kicker">Interface Previews</div>
+          <h2 class="section-title">Built for high-volume asset production</h2>
+          <p>Real application screenshots showing SheetFlow operating in design projects.</p>
+        </div>
+
+        <div class="feature-grid">
+          <div class="feature-box">
+            <img src="assets/sheetflow-featured-1.jpg" alt="SheetFlow live appointment schedule sync" style="border-radius: var(--radius-sm); margin-bottom: 1rem;">
+            <div class="feature-index">CAPABILITY 01</div>
+            <h3>Live Row-by-Row Navigation</h3>
+            <p>Preview each dataset row before populating templates. Ideal for appointment reminders, medical clinic schedules, and custom notifications.</p>
+          </div>
+
+          <div class="feature-box">
+            <img src="assets/sheetflow-featured-2.jpg" alt="Bulk batch multi-asset generation" style="border-radius: var(--radius-sm); margin-bottom: 1rem;">
+            <div class="feature-index">CAPABILITY 02</div>
+            <h3>Multi-Asset Batch Preparation</h3>
+            <p>Create batches of 100 or more event tickets, certificates, or member passes systematically from tabular sources.</p>
+          </div>
+
+          <div class="feature-box">
+            <img src="assets/sheetflow-featured-3.jpg" alt="1-click Google Sheets connection modal" style="border-radius: var(--radius-sm); margin-bottom: 1rem;">
+            <div class="feature-index">CAPABILITY 03</div>
+            <h3>Direct URL Ingestion</h3>
+            <p>No database setups, credential tokens, or backend pipelines required. Connect spreadsheet URLs in under five seconds.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section: Data Integrity Guarantee -->
+    <section class="section" id="privacy-guarantee">
+      <div class="container">
+        <div class="trust-banner">
+          <div class="trust-content">
+            <div class="badge badge-cyan">Zero-Server Guarantee</div>
+            <h2>Your data never touches a proprietary database</h2>
+            <p>
+              SheetFlow was built with privacy by design. When you synchronize a Google Sheet, data travels directly between Google's servers and your local Canva editor browser tab.
+            </p>
+            <div style="margin-top: 1rem;">
+              <a href="privacy.html" class="btn btn-secondary">Read Full Privacy Policy</a>
+            </div>
+          </div>
+
+          <ul class="trust-list">
+            <li class="trust-item">
+              <span class="trust-icon">&#10003;</span>
+              <span><strong>Zero Persistence:</strong> We operate no remote databases or storage buckets that retain your spreadsheet content.</span>
+            </li>
+            <li class="trust-item">
+              <span class="trust-icon">&#10003;</span>
+              <span><strong>Session Scope:</strong> Data lives in browser RAM during your active session and is wiped when you close the Canva editor tab.</span>
+            </li>
+            <li class="trust-item">
+              <span class="trust-icon">&#10003;</span>
+              <span><strong>No Commercial Profiling:</strong> We do not track, scrape, or sell business records, email lists, or customer names.</span>
+            </li>
+            <li class="trust-item">
+              <span class="trust-icon">&#10003;</span>
+              <span><strong>Official SDK Compliance:</strong> Fully compliant with Canva Developer Terms and Google API Limited Use disclosure standards.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section: Real Frequently Asked Questions -->
+    <section class="section">
+      <div class="container-narrow">
+        <div class="section-header" style="text-align: center;">
+          <div class="section-kicker">Common Inquiries</div>
+          <h2 class="section-title">Frequently Asked Questions</h2>
+          <p>Practical answers to setup, privacy, and operational details.</p>
+        </div>
+
+        <div class="faq-list">
+          <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+              <span>What Google Sheet permissions are required for SheetFlow?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              Your Google Sheet must be set to "Anyone with the link can view" or published to the web. SheetFlow requests only read access to fetch the CSV structure directly into your Canva editor. We never request edit or admin permissions to your Google Drive.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+              <span>Does SheetFlow store or log my spreadsheet data?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              No. SheetFlow has zero backend database servers. Data fetched from Google Sheets is processed in your local browser sandbox and directly applied to Canva elements. When you refresh or close the tab, the in-memory cache is immediately cleared.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+              <span>How many rows can SheetFlow handle simultaneously?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              SheetFlow is optimized for batches of 1 to 1,000 rows. In our production benchmarks, datasets with up to 100 columns and hundreds of rows parse in under 300 milliseconds.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+              <span>Can I use SheetFlow on Canva Mobile or Tablet?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              Yes. SheetFlow is built using responsive layouts adhering to Canva Apps SDK v2 standards, functioning seamlessly across desktop, tablet, and mobile Canva editor environments.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <img src="assets/sheetflow-app-icon.png" alt="SheetFlow Logo" width="28" height="28">
+          <span>SheetFlow</span>
+        </div>
+        <ul class="footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="terms.html">Terms and Conditions</a></li>
+          <li><a href="privacy.html">Privacy Policy</a></li>
+          <li><a href="support.html">Support Center</a></li>
+          <li><a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+        </ul>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; 2026 SheetFlow. Independent application built for the Canva platform.</span>
+        <span>Canva is a trademark of Canva Pty Ltd. Google Sheets is a trademark of Google LLC.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

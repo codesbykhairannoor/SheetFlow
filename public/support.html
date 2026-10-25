@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support Center | SheetFlow</title>
+  <meta name="description" content="Get support, troubleshooting guides, and technical assistance for SheetFlow on Canva.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/png" href="assets/sheetflow-app-icon.png">
+</head>
+<body>
+
+  <!-- Site Navigation Header -->
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="index.html" class="brand-link" aria-label="SheetFlow Home">
+        <img src="assets/sheetflow-app-icon.png" alt="SheetFlow Logo" class="brand-icon" width="32" height="32">
+        <span>SheetFlow</span>
+      </a>
+
+      <nav aria-label="Main Navigation">
+        <ul class="nav-menu">
+          <li><a href="index.html#simulator" class="nav-link">Live Demo</a></li>
+          <li><a href="index.html#how-it-works" class="nav-link">Architecture</a></li>
+          <li><a href="index.html#privacy-guarantee" class="nav-link">Data Integrity</a></li>
+          <li><a href="terms.html" class="nav-link">Terms</a></li>
+          <li><a href="privacy.html" class="nav-link">Privacy</a></li>
+          <li><a href="support.html" class="nav-link active">Support</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="https://www.canva.com/apps" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+          Open in Canva
+        </a>
+        <button type="button" class="mobile-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding: 4rem 0 6rem;">
+    <div class="container">
+      
+      <!-- Section Header -->
+      <div class="section-header" style="max-width: 720px;">
+        <div class="badge badge-green">Developer Assistance</div>
+        <h1 style="font-size: clamp(2rem, 3.5vw, 2.75rem); margin-top: 0.5rem;">SheetFlow Support Center</h1>
+        <p style="margin-top: 0.75rem;">
+          Find step-by-step guidance for configuring your Google Sheets, review troubleshooting solutions, or submit an inquiry directly to the engineering team.
+        </p>
+      </div>
+
+      <!-- Main Support Grid: Troubleshooting & Contact Form -->
+      <div class="support-grid">
+        
+        <!-- Left: Quick Solutions & Direct Channels -->
+        <div class="support-info">
+          
+          <div class="contact-card">
+            <h3>Direct Email Inquiries</h3>
+            <p>Our engineering team responds to developer and creator requests within 24 business hours.</p>
+            <p style="font-family: var(--font-mono); font-size: 0.875rem; color: var(--accent-green); font-weight: 700; margin-top: 0.5rem;">
+              support.sheetflow@gmail.com
+            </p>
+          </div>
+
+          <div class="contact-card">
+            <h3>Open Source Issue Tracking</h3>
+            <p>Encountered a repeatable bug or edge-case CSV structure? File a public ticket with sample data.</p>
+            <div style="margin-top: 0.75rem;">
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="width: auto; min-height: 38px; padding: 0.5rem 1rem; font-size: 0.875rem;">
+                Visit GitHub Issues
+              </a>
+            </div>
+          </div>
+
+          <div class="contact-card">
+            <h3>Setup Checklist: Google Sheet Sharing</h3>
+            <p>To enable SheetFlow to read your spreadsheet cells:</p>
+            <ol style="padding-left: 1.25rem; margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6;">
+              <li>Open your Google Sheet in a web browser.</li>
+              <li>Click the top-right <strong>Share</strong> button.</li>
+              <li>Under "General access", select <strong>Anyone with the link</strong>.</li>
+              <li>Set role to <strong>Viewer</strong>.</li>
+              <li>Copy the sharing URL and paste it into SheetFlow in Canva.</li>
+            </ol>
+          </div>
+
+        </div>
+
+        <!-- Right: Interactive Contact & Inquiry Form -->
+        <div class="support-form-card">
+          <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Send a Technical Inquiry</h2>
+          <p style="font-size: 0.875rem; margin-bottom: 1.5rem;">
+            Fill in your details below. Submitting will prepare a formatted ticket directly for our support desk.
+          </p>
+
+          <form id="support-contact-form" novalidate>
+            <div class="form-group">
+              <label for="sender-name" class="form-label">Your Name <span style="color: var(--accent-red)">*</span></label>
+              <input type="text" id="sender-name" class="form-input" placeholder="e.g. Jane Doe" required>
+            </div>
+
+            <div class="form-group">
+              <label for="sender-email" class="form-label">Email Address <span style="color: var(--accent-red)">*</span></label>
+              <input type="email" id="sender-email" class="form-input" placeholder="name@company.com" required>
+              <span class="form-hint">We will reply to this address within one business day.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="issue-topic" class="form-label">Inquiry Category</label>
+              <select id="issue-topic" class="form-select">
+                <option value="Sheet Connection Help">Google Sheet Connection or Permission Issue</option>
+                <option value="Column Mapping Question">Column Mapping or Tag Replacement</option>
+                <option value="Bug Report">Bug or Parsing Anomaly Report</option>
+                <option value="Feature Suggestion">Feature Suggestion or Workflow Feedback</option>
+                <option value="Other">Other Technical Inquiry</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="issue-message" class="form-label">Message Details <span style="color: var(--accent-red)">*</span></label>
+              <textarea id="issue-message" class="form-textarea" placeholder="Please describe what you are trying to accomplish and any error message displayed..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+              Submit Support Ticket
+            </button>
+
+            <div id="form-status" class="form-status" role="alert"></div>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- Common Troubleshooting Matrix -->
+      <section style="margin-top: 4rem; padding-top: 3rem; border-top: 1px solid var(--border-subtle);">
+        <div class="section-header">
+          <div class="section-kicker">Troubleshooting Matrix</div>
+          <h2 class="section-title">Common Resolution Steps</h2>
+        </div>
+
+        <div class="feature-grid">
+          <div class="feature-box">
+            <div class="feature-index">SCENARIO A</div>
+            <h3>"Failed to fetch spreadsheet data"</h3>
+            <p><strong>Cause:</strong> The Google Sheet is set to "Restricted" access mode.</p>
+            <p><strong>Fix:</strong> In Google Sheets, update Share settings to "Anyone with the link can view". Alternatively, use <em>File &gt; Share &gt; Publish to web</em> and select CSV format.</p>
+          </div>
+
+          <div class="feature-box">
+            <div class="feature-index">SCENARIO B</div>
+            <h3>"Columns not appearing in tag selector"</h3>
+            <p><strong>Cause:</strong> The first row of your sheet contains blank header cells or merged title rows.</p>
+            <p><strong>Fix:</strong> Ensure Row 1 contains clean text header titles without merged cells across columns.</p>
+          </div>
+
+          <div class="feature-box">
+            <div class="feature-index">SCENARIO C</div>
+            <h3>"Values showing #VALUE! or #REF!"</h3>
+            <p><strong>Cause:</strong> Formulas in your sheet depend on external sheets that are private.</p>
+            <p><strong>Fix:</strong> Copy and paste values only (<em>Ctrl + Shift + V</em>) for dependent reference columns before running bulk generation.</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <img src="assets/sheetflow-app-icon.png" alt="SheetFlow Logo" width="28" height="28">
+          <span>SheetFlow</span>
+        </div>
+        <ul class="footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="terms.html">Terms and Conditions</a></li>
+          <li><a href="privacy.html">Privacy Policy</a></li>
+          <li><a href="support.html">Support Center</a></li>
+          <li><a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+        </ul>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; 2026 SheetFlow. Independent application built for the Canva platform.</span>
+        <span>Canva is a trademark of Canva Pty Ltd. Google Sheets is a trademark of Google LLC.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
