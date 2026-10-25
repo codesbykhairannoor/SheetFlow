@@ -194,7 +194,7 @@ def generate_featured_1():
     canvas.paste(conn_img, (conn_x, conn_y), mask=conn_img)
     
     # Footer
-    footer_text = "Designed for Canva Apps Marketplace  •  Supports Google Sheets Live Sync & CSV Import"
+    footer_text = "Designed for Canva Apps Marketplace  •  Live Google Sheets Synchronization"
     f_bbox = fonts["footer"].getbbox(footer_text)
     fw = f_bbox[2] - f_bbox[0]
     draw = ImageDraw.Draw(canvas)
@@ -315,7 +315,7 @@ def generate_featured_2():
         canvas.paste(rounded_fc, (cx, card_y), mask=rounded_fc)
     
     # Footer
-    footer_text = "Designed for Canva Apps Marketplace  •  Supports Google Sheets Live Sync & CSV Import"
+    footer_text = "Designed for Canva Apps Marketplace  •  Live Google Sheets Synchronization"
     f_bbox = fonts["footer"].getbbox(footer_text)
     fw = f_bbox[2] - f_bbox[0]
     draw = ImageDraw.Draw(canvas)
