@@ -10,16 +10,13 @@ import {
   TextInput,
   Title,
 } from "@canva/app-ui-kit";
-import { auth } from "@canva/user";
 import { addElementAtCursor, addElementAtPoint } from "@canva/design";
 import * as styles from "styles/components.css";
 import type { SpreadsheetData, SyncStatus } from "../../types/sheetsync";
 import {
   fetchGoogleSheetLive,
-  fetchUserSpreadsheetsFromDrive,
   getGoogleSheetsCandidateUrls,
   parseCsvText,
-  type GoogleDriveSpreadsheet,
 } from "../../services/sheetParser";
 import {
   applyValueToCanvas,
@@ -34,8 +31,6 @@ import {
   clearActiveSheet,
   getRecentSheets,
   quickSaveDraftUrl,
-  setGoogleConnected,
-  isGoogleConnectedSaved,
   type RecentSheetEntry,
 } from "../../services/appStorage";
 
@@ -56,50 +51,12 @@ export const App = () => {
   const [inputMode, setInputMode] = useState<"sheets" | "csv">("sheets");
   const [showRawCsvText, setShowRawCsvText] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [googleTab, setGoogleTab] = useState<"picker" | "link">("picker");
   const [activeRowIndex, setActiveRowIndex] = useState<number>(0);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>({ state: "idle" });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const [isAuthorizing, setIsAuthorizing] = useState<boolean>(false);
-  const [isGoogleConnected, setIsGoogleConnected] = useState<boolean>(false);
-  const [userDriveSheets, setUserDriveSheets] = useState<GoogleDriveSpreadsheet[]>([]);
-  const [driveError, setDriveError] = useState<"insufficient_scope" | "api_disabled" | "other" | null>(null);
-  const [isLoadingDriveSheets, setIsLoadingDriveSheets] = useState<boolean>(false);
   const [recentSheets, setRecentSheets] = useState<RecentSheetEntry[]>([]);
   const [isSwitchingSheet, setIsSwitchingSheet] = useState<boolean>(false);
-
-  // Helper: Resilient OAuth Client (supports provider 'google' or default)
-  const getOAuthClient = useCallback(() => {
-    try {
-      return auth.initOauth({ provider: "google", type: "single_account" });
-    } catch {
-      return auth.initOauth();
-    }
-  }, []);
-
-  // Fetch user's Google Drive Spreadsheets
-  const loadUserDriveSheets = useCallback(async () => {
-    setIsLoadingDriveSheets(true);
-    try {
-      const oauth = getOAuthClient();
-      let tokenRes = await oauth.getAccessToken();
-      if (!tokenRes?.token) {
-        tokenRes = await oauth.getAccessToken({ forceRefresh: true });
-      }
-      if (tokenRes?.token) {
-        setIsGoogleConnected(true);
-        await setGoogleConnected(true);
-        const result = await fetchUserSpreadsheetsFromDrive(tokenRes.token);
-        setUserDriveSheets(result.files);
-        setDriveError(result.error ?? null);
-      }
-    } catch (err) {
-      console.warn("Drive sheets fetch note:", err);
-    } finally {
-      setIsLoadingDriveSheets(false);
-    }
-  }, [getOAuthClient]);
 
   // Connect & Sync with Google Sheet URL
   const connectUrl = useCallback(
@@ -120,20 +77,7 @@ export const App = () => {
       });
 
       try {
-        let accessToken: string | undefined;
-        try {
-          const oauth = getOAuthClient();
-          const tokenRes = await oauth.getAccessToken();
-          if (tokenRes?.token) {
-            accessToken = tokenRes.token;
-            setIsGoogleConnected(true);
-            await setGoogleConnected(true);
-          }
-        } catch {
-          // Not authorized or anonymous
-        }
-
-        const data = await fetchGoogleSheetLive(url, accessToken);
+        const data = await fetchGoogleSheetLive(url);
         if (data.totalRows === 0) {
           throw new Error("Connected, but the sheet has no rows of data.");
         }
@@ -163,7 +107,7 @@ export const App = () => {
         setIsRefreshing(false);
       }
     },
-    [getOAuthClient]
+    []
   );
 
   // Hydrate saved URL, cached dataset, and recent sheets history on mount
@@ -174,33 +118,6 @@ export const App = () => {
       try {
         const recents = await getRecentSheets();
         if (isMounted) setRecentSheets(recents);
-
-        // Restore Google auth persistence
-        const savedAuth = await isGoogleConnectedSaved();
-        if (savedAuth && isMounted) {
-          setIsGoogleConnected(true);
-        }
-
-        // Check if already authenticated with Google
-        try {
-          const oauth = getOAuthClient();
-          let tokenRes = await oauth.getAccessToken();
-          if (!tokenRes?.token && savedAuth) {
-            tokenRes = await oauth.getAccessToken({ forceRefresh: true });
-          }
-
-          if (tokenRes?.token && isMounted) {
-            setIsGoogleConnected(true);
-            await setGoogleConnected(true);
-            const result = await fetchUserSpreadsheetsFromDrive(tokenRes.token);
-            if (isMounted) {
-              setUserDriveSheets(result.files);
-              setDriveError(result.error ?? null);
-            }
-          }
-        } catch {
-          // OAuth not connected
-        }
 
         const { url, data, draftUrl } = await restoreActiveSheet();
         if (data && data.rows && data.rows.length > 0 && isMounted) {
@@ -224,8 +141,7 @@ export const App = () => {
     return () => {
       isMounted = false;
     };
-  }, [connectUrl, getOAuthClient]);
-
+  }, [connectUrl]);
 
   // Handler: Manual Connect Button
   const handleConnectGoogleSheets = async () => {
@@ -236,60 +152,6 @@ export const App = () => {
   const handleRefreshData = async () => {
     if (googleSheetsUrl) {
       await connectUrl(googleSheetsUrl, true);
-    }
-  };
-
-  // Handler: Sign in with Google (Canva Native OAuth)
-  const handleGoogleSignIn = async () => {
-    setIsAuthorizing(true);
-    setSyncStatus({
-      state: "fetching",
-      message: "Opening Google authorization...",
-    });
-
-    try {
-      const oauth = getOAuthClient();
-      const response = await oauth.requestAuthorization({
-        queryParams: { prompt: "consent" },
-        scope: new Set([
-          "https://www.googleapis.com/auth/spreadsheets.readonly",
-          "https://www.googleapis.com/auth/drive.readonly",
-          "https://www.googleapis.com/auth/drive.metadata.readonly",
-        ]),
-      });
-      if (response.status === "completed") {
-        setIsGoogleConnected(true);
-        await setGoogleConnected(true);
-        setGoogleTab("picker");
-        await loadUserDriveSheets();
-        setSyncStatus({ state: "idle" });
-      } else {
-        setSyncStatus({ state: "idle" });
-      }
-    } catch (err: unknown) {
-      console.warn("Google OAuth note:", err);
-      setSyncStatus({
-        state: "error",
-        message:
-          "Google OAuth was cancelled or not yet enabled. You can connect via sheet link below!",
-      });
-    } finally {
-      setIsAuthorizing(false);
-    }
-  };
-
-  // Handler: Sign out from Google
-  const handleGoogleSignOut = async () => {
-    try {
-      const oauth = getOAuthClient();
-      await oauth.deauthorize();
-      setIsGoogleConnected(false);
-      await setGoogleConnected(false);
-      setUserDriveSheets([]);
-      setDriveError(null);
-      setSyncStatus({ state: "idle" });
-    } catch (err) {
-      console.warn("Sign out error:", err);
     }
   };
 
@@ -489,14 +351,12 @@ export const App = () => {
           <Title size="small">SheetFlow</Title>
           {spreadsheet ? (
             <Badge tone="positive">Connected</Badge>
-          ) : isGoogleConnected ? (
-            <Badge tone="positive">Google Ready</Badge>
           ) : (
             <Badge tone="info">Ready</Badge>
           )}
         </div>
         <Text size="small" tone="tertiary">
-          Auto-fill and sync design elements directly from Google Sheets.
+          Auto-fill and sync design elements directly from Google Sheets or CSV.
         </Text>
       </div>
 
@@ -517,137 +377,31 @@ export const App = () => {
       {/* ------------------------------------------------------------------ */}
       {!spreadsheet ? (
         <div className={styles.setupAccordion}>
-          {isGoogleConnected ? (
-            /* --- SUB-STATE A1: USER SIGNED IN WITH GOOGLE --- */
-            <Rows spacing="1.5u">
-              {/* Clean Google Account Strip */}
-              <div className={styles.googleAccountStrip}>
-                <div className={styles.googleAccountInfo}>
-                  <span>🟢</span>
-                  <span>
-                    <strong>Google Account Connected</strong>
-                  </span>
-                </div>
-                <Button
-                  variant="tertiary"
-                  size="small"
-                  onClick={handleGoogleSignOut}
-                >
-                  Sign out
-                </Button>
-              </div>
+          <Rows spacing="1.5u">
+            <Text size="small">
+              <strong>Connect your spreadsheet to start:</strong>
+            </Text>
 
-              {/* If Google Drive files exist, show them */}
-              {userDriveSheets.length > 0 && (
-                <Rows spacing="1u">
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <Text size="small">
-                      <strong>Google Drive Files:</strong>
-                    </Text>
-                    <Button
-                      variant="tertiary"
-                      size="small"
-                      onClick={loadUserDriveSheets}
-                      loading={isLoadingDriveSheets}
-                    >
-                      🔄 Refresh
-                    </Button>
-                  </div>
-                  <div className={styles.sheetPickerList}>
-                    {userDriveSheets.map((sheet) => (
-                      <div
-                        key={sheet.id}
-                        className={styles.sheetPickerItem}
-                        onClick={() => connectUrl(sheet.url, false)}
-                        role="button"
-                        tabIndex={0}
-                      >
-                        <div
-                          style={{
-                            flex: 1,
-                            minWidth: 0,
-                            paddingRight: "8px",
-                          }}
-                        >
-                          <div className={styles.sheetItemTitle}>
-                            📊 {sheet.name}
-                          </div>
-                          <div className={styles.sheetItemTime}>
-                            {sheet.modifiedTime
-                              ? `Updated ${new Date(sheet.modifiedTime).toLocaleDateString()}`
-                              : "Google Sheet"}
-                          </div>
-                        </div>
-                        <Button variant="secondary" size="small">
-                          Open
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </Rows>
-              )}
+            {/* Mode Selector Tabs */}
+            <div style={{ display: "flex", gap: "8px" }}>
+              <Button
+                variant={inputMode === "sheets" ? "primary" : "secondary"}
+                onClick={() => setInputMode("sheets")}
+                stretch
+              >
+                📊 Google Sheet Link
+              </Button>
+              <Button
+                variant={inputMode === "csv" ? "primary" : "secondary"}
+                onClick={() => setInputMode("csv")}
+                stretch
+              >
+                📁 Upload .CSV File
+              </Button>
+            </div>
 
-              {/* Show Recent Spreadsheets History */}
-              {recentSheets.length > 0 && (
-                <div className={styles.recentSection}>
-                  <Text size="small">
-                    <strong>Recent Spreadsheets:</strong>
-                  </Text>
-                  {recentSheets.map((recent) => (
-                    <div
-                      key={recent.url}
-                      className={styles.recentCard}
-                      onClick={() => connectUrl(recent.url, false)}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      <div className={styles.recentCardInfo}>
-                        <div className={styles.recentCardTitle}>
-                          📊 {recent.title}
-                        </div>
-                        <div className={styles.recentCardMeta}>
-                          {`${recent.rows} rows · Click to reconnect`}
-                        </div>
-                      </div>
-                      <Button variant="tertiary" size="small">
-                        Open
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Main Connect Form */}
+            {inputMode === "sheets" ? (
               <Rows spacing="1u">
-                {userDriveSheets.length === 0 && driveError === "insufficient_scope" && (
-                  <div
-                    style={{
-                      padding: "10px",
-                      backgroundColor: "rgba(59, 130, 246, 0.08)",
-                      borderRadius: "8px",
-                      border: "1px solid rgba(59, 130, 246, 0.2)",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "6px",
-                    }}
-                  >
-                    <div style={{ fontWeight: 600, fontSize: "12px", color: "var(--ui-kit-color-text-primary)" }}>
-                      📁 Select directly from Google Drive
-                    </div>
-                    <Text size="small" tone="tertiary">
-                      Google requires permission to list Drive files. Click below to grant access:
-                    </Text>
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      onClick={handleGoogleSignIn}
-                      stretch
-                    >
-                      Grant Google Drive Access
-                    </Button>
-                  </div>
-                )}
-
                 <FormField
                   label="Google Sheets Sharing URL"
                   description="Set sheet General access to 'Anyone with the link' (Viewer):"
@@ -672,179 +426,107 @@ export const App = () => {
                 >
                   Connect Google Sheet
                 </Button>
+              </Rows>
+            ) : (
+              /* --- CSV UPLOAD MODE --- */
+              <Rows spacing="1.5u">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept=".csv,text/csv"
+                  onChange={handleCsvFileUpload}
+                  style={{ display: "none" }}
+                />
+
+                <div
+                  className={styles.fileDropzone}
+                  onClick={() => fileInputRef.current?.click()}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <div className={styles.fileDropzoneIcon}>📁</div>
+                  <div className={styles.fileDropzoneTitle}>Upload .CSV File</div>
+                  <div className={styles.fileDropzoneHint}>
+                    Click to choose a .csv file from your computer
+                  </div>
+                </div>
+
+                <Button
+                  variant="primary"
+                  onClick={() => fileInputRef.current?.click()}
+                  loading={isLoading}
+                  stretch
+                >
+                  Choose .CSV File
+                </Button>
+
                 <Button
                   variant="tertiary"
                   size="small"
-                  onClick={() => setInputMode("csv")}
+                  onClick={() => setShowRawCsvText(!showRawCsvText)}
                   stretch
                 >
-                  📁 Or upload a local .CSV file
+                  {showRawCsvText ? "▲ Hide text paste" : "▼ Or paste raw CSV text"}
                 </Button>
+
+                {showRawCsvText && (
+                  <Rows spacing="1u">
+                    <FormField
+                      label="Paste CSV Data"
+                      description="Format: Header1,Header2 on the first row"
+                      control={(props) => (
+                        <TextInput
+                          {...props}
+                          placeholder={`Product Name,Price\nFlannel Shirt,Rp 150.000`}
+                          value={rawCsvInput}
+                          onChange={(val) => setRawCsvInput(val)}
+                        />
+                      )}
+                    />
+                    <Button
+                      variant="secondary"
+                      size="small"
+                      onClick={handleParseCsv}
+                      disabled={!rawCsvInput.trim()}
+                      stretch
+                    >
+                      Load Pasted CSV
+                    </Button>
+                  </Rows>
+                )}
               </Rows>
-            </Rows>
-          ) : (
-            /* --- SUB-STATE A2: USER NOT YET CONNECTED --- */
-            <Rows spacing="1.5u">
-              <Text size="small">
-                <strong>Connect your spreadsheet to start:</strong>
-              </Text>
+            )}
 
-              <Button
-                variant="primary"
-                onClick={handleGoogleSignIn}
-                loading={isAuthorizing}
-                stretch
-              >
-                🔵 Sign in with Google
-              </Button>
-
-              <div className={styles.divider}>OR CONNECT VIA LINK</div>
-
-              {inputMode === "sheets" ? (
-                <Rows spacing="1u">
-                  <FormField
-                    label="Google Sheets Sharing URL"
-                    description="Set sheet General access to 'Anyone with the link' (Viewer):"
-                    control={(props) => (
-                      <TextInput
-                        {...props}
-                        placeholder="Paste Google Sheet URL here (Ctrl + V)..."
-                        value={googleSheetsUrl}
-                        onChange={(val) => {
-                          setGoogleSheetsUrl(val);
-                          quickSaveDraftUrl(val);
-                        }}
-                      />
-                    )}
-                  />
-                  <Button
-                    variant="secondary"
-                    onClick={handleConnectGoogleSheets}
-                    loading={isLoading}
-                    disabled={!googleSheetsUrl.trim()}
-                    stretch
-                  >
-                    Connect Google Sheet
-                  </Button>
-                  <Button
-                    variant="tertiary"
-                    size="small"
-                    onClick={() => setInputMode("csv")}
-                    stretch
-                  >
-                    📁 Or upload a local .CSV file
-                  </Button>
-                </Rows>
-              ) : (
-                /* --- CSV UPLOAD MODE --- */
-                <Rows spacing="1.5u">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    accept=".csv,text/csv"
-                    onChange={handleCsvFileUpload}
-                    style={{ display: "none" }}
-                  />
-
+            {/* 1-Click Recent Spreadsheets Reconnect List */}
+            {recentSheets.length > 0 && (
+              <div className={styles.recentSection}>
+                <Text size="small">
+                  <strong>Recent Spreadsheets:</strong>
+                </Text>
+                {recentSheets.map((recent) => (
                   <div
-                    className={styles.fileDropzone}
-                    onClick={() => fileInputRef.current?.click()}
+                    key={recent.url}
+                    className={styles.recentCard}
+                    onClick={() => connectUrl(recent.url, false)}
                     role="button"
                     tabIndex={0}
                   >
-                    <div className={styles.fileDropzoneIcon}>📁</div>
-                    <div className={styles.fileDropzoneTitle}>Upload .CSV File</div>
-                    <div className={styles.fileDropzoneHint}>
-                      Click to choose a .csv file from your computer
-                    </div>
-                  </div>
-
-                  <Button
-                    variant="primary"
-                    onClick={() => fileInputRef.current?.click()}
-                    loading={isLoading}
-                    stretch
-                  >
-                    Choose .CSV File
-                  </Button>
-
-                  <Button
-                    variant="tertiary"
-                    size="small"
-                    onClick={() => setShowRawCsvText(!showRawCsvText)}
-                    stretch
-                  >
-                    {showRawCsvText ? "▲ Hide text paste" : "▼ Or paste raw CSV text"}
-                  </Button>
-
-                  {showRawCsvText && (
-                    <Rows spacing="1u">
-                      <FormField
-                        label="Paste CSV Data"
-                        description="Format: Header1,Header2 on the first row"
-                        control={(props) => (
-                          <TextInput
-                            {...props}
-                            placeholder={`Product Name,Price\nFlannel Shirt,Rp 150.000`}
-                            value={rawCsvInput}
-                            onChange={(val) => setRawCsvInput(val)}
-                          />
-                        )}
-                      />
-                      <Button
-                        variant="secondary"
-                        size="small"
-                        onClick={handleParseCsv}
-                        disabled={!rawCsvInput.trim()}
-                        stretch
-                      >
-                        Load Pasted CSV
-                      </Button>
-                    </Rows>
-                  )}
-
-                  <Button
-                    variant="secondary"
-                    size="small"
-                    onClick={() => setInputMode("sheets")}
-                    stretch
-                  >
-                    Back to Google Sheets Link
-                  </Button>
-                </Rows>
-              )}
-
-              {/* 1-Click Recent Spreadsheets Reconnect List */}
-              {recentSheets.length > 0 && (
-                <div className={styles.recentSection}>
-                  <Text size="small">
-                    <strong>Recent Spreadsheets:</strong>
-                  </Text>
-                  {recentSheets.map((recent) => (
-                    <div
-                      key={recent.url}
-                      className={styles.recentCard}
-                      onClick={() => connectUrl(recent.url, false)}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      <div className={styles.recentCardInfo}>
-                        <div className={styles.recentCardTitle}>
-                          📊 {recent.title}
-                        </div>
-                        <div className={styles.recentCardMeta}>
-                          {`${recent.rows} rows · Click to reconnect`}
-                        </div>
+                    <div className={styles.recentCardInfo}>
+                      <div className={styles.recentCardTitle}>
+                        📊 {recent.title}
                       </div>
-                      <Button variant="tertiary" size="small">
-                        Open
-                      </Button>
+                      <div className={styles.recentCardMeta}>
+                        {`${recent.rows} rows · Click to reconnect`}
+                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </Rows>
-          )}
+                    <Button variant="tertiary" size="small">
+                      Open
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Rows>
         </div>
       ) : (
         /* ------------------------------------------------------------------ */
