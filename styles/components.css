@@ -356,4 +356,41 @@
   color: var(--ui-kit-color-text-tertiary);
 }
 
+/* File Upload Dropzone */
+.fileDropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ui-kit-space-100);
+  padding: var(--ui-kit-space-200);
+  background-color: var(--ui-kit-color-surface-secondary);
+  border: 2px dashed var(--ui-kit-color-border-subtle);
+  border-radius: var(--ui-kit-radius-container-standard);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.fileDropzone:hover {
+  background-color: var(--ui-kit-color-surface-hover);
+  border-color: var(--ui-kit-color-border-hover);
+}
+
+.fileDropzoneIcon {
+  font-size: 28px;
+}
+
+.fileDropzoneTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ui-kit-color-text-primary);
+}
+
+.fileDropzoneHint {
+  font-size: 11px;
+  color: var(--ui-kit-color-text-tertiary);
+}
+
+
 

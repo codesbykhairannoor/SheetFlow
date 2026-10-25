@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useFeatureSupport, useSelection } from "@canva/app-hooks";
 import {
   Alert,
@@ -54,6 +54,8 @@ export const App = () => {
   const [googleSheetsUrl, setGoogleSheetsUrl] = useState<string>("");
   const [rawCsvInput, setRawCsvInput] = useState<string>("");
   const [inputMode, setInputMode] = useState<"sheets" | "csv">("sheets");
+  const [showRawCsvText, setShowRawCsvText] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [googleTab, setGoogleTab] = useState<"picker" | "link">("picker");
   const [activeRowIndex, setActiveRowIndex] = useState<number>(0);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>({ state: "idle" });
@@ -289,6 +291,49 @@ export const App = () => {
     } catch (err) {
       console.warn("Sign out error:", err);
     }
+  };
+
+  // Handler: Upload .CSV file from local computer
+  const handleCsvFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsLoading(true);
+    setSyncStatus({ state: "fetching", message: `Reading ${file.name}...` });
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const text = event.target?.result;
+        if (typeof text !== "string" || !text.trim()) {
+          throw new Error("The selected file is empty.");
+        }
+        const titleClean = file.name.replace(/\.[^/.]+$/, "");
+        const data = parseCsvText(text, titleClean, "csv_raw");
+        if (data.totalRows === 0) {
+          throw new Error("No data rows found in this CSV file.");
+        }
+        setSpreadsheet(data);
+        setActiveRowIndex(0);
+        setIsSwitchingSheet(false);
+        setSyncStatus({
+          state: "success",
+          message: `Loaded ${data.totalRows} rows from "${file.name}"!`,
+        });
+      } catch (err: unknown) {
+        const msg =
+          err instanceof Error ? err.message : "Failed to load CSV file.";
+        setSyncStatus({ state: "error", message: msg });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    reader.onerror = () => {
+      setSyncStatus({ state: "error", message: "Failed to read the file from disk." });
+      setIsLoading(false);
+    };
+    reader.readAsText(file);
+    e.target.value = "";
   };
 
   // Handler: Parse Raw CSV
@@ -627,6 +672,14 @@ export const App = () => {
                 >
                   Connect Google Sheet
                 </Button>
+                <Button
+                  variant="tertiary"
+                  size="small"
+                  onClick={() => setInputMode("csv")}
+                  stretch
+                >
+                  📁 Or upload a local .CSV file
+                </Button>
               </Rows>
             </Rows>
           ) : (
@@ -679,38 +732,84 @@ export const App = () => {
                     onClick={() => setInputMode("csv")}
                     stretch
                   >
-                    Or paste CSV text instead
+                    📁 Or upload a local .CSV file
                   </Button>
                 </Rows>
               ) : (
+                /* --- CSV UPLOAD MODE --- */
                 <Rows spacing="1.5u">
-                  <FormField
-                    label="Paste CSV Data"
-                    description="Format: Header1,Header2 on the first row"
-                    control={(props) => (
-                      <TextInput
-                        {...props}
-                        placeholder={`Product Name,Price\nFlannel Shirt,Rp 150.000`}
-                        value={rawCsvInput}
-                        onChange={(val) => setRawCsvInput(val)}
-                      />
-                    )}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept=".csv,text/csv"
+                    onChange={handleCsvFileUpload}
+                    style={{ display: "none" }}
                   />
+
+                  <div
+                    className={styles.fileDropzone}
+                    onClick={() => fileInputRef.current?.click()}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <div className={styles.fileDropzoneIcon}>📁</div>
+                    <div className={styles.fileDropzoneTitle}>Upload .CSV File</div>
+                    <div className={styles.fileDropzoneHint}>
+                      Click to choose a .csv file from your computer
+                    </div>
+                  </div>
+
                   <Button
                     variant="primary"
-                    onClick={handleParseCsv}
-                    disabled={!rawCsvInput.trim()}
+                    onClick={() => fileInputRef.current?.click()}
+                    loading={isLoading}
                     stretch
                   >
-                    Load CSV Data
+                    Choose .CSV File
                   </Button>
+
                   <Button
                     variant="tertiary"
+                    size="small"
+                    onClick={() => setShowRawCsvText(!showRawCsvText)}
+                    stretch
+                  >
+                    {showRawCsvText ? "▲ Hide text paste" : "▼ Or paste raw CSV text"}
+                  </Button>
+
+                  {showRawCsvText && (
+                    <Rows spacing="1u">
+                      <FormField
+                        label="Paste CSV Data"
+                        description="Format: Header1,Header2 on the first row"
+                        control={(props) => (
+                          <TextInput
+                            {...props}
+                            placeholder={`Product Name,Price\nFlannel Shirt,Rp 150.000`}
+                            value={rawCsvInput}
+                            onChange={(val) => setRawCsvInput(val)}
+                          />
+                        )}
+                      />
+                      <Button
+                        variant="secondary"
+                        size="small"
+                        onClick={handleParseCsv}
+                        disabled={!rawCsvInput.trim()}
+                        stretch
+                      >
+                        Load Pasted CSV
+                      </Button>
+                    </Rows>
+                  )}
+
+                  <Button
+                    variant="secondary"
                     size="small"
                     onClick={() => setInputMode("sheets")}
                     stretch
                   >
-                    Back to Google Sheets URL
+                    Back to Google Sheets Link
                   </Button>
                 </Rows>
               )}
@@ -839,6 +938,21 @@ export const App = () => {
                   stretch
                 >
                   Load Spreadsheet
+                </Button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept=".csv,text/csv"
+                  onChange={handleCsvFileUpload}
+                  style={{ display: "none" }}
+                />
+                <Button
+                  variant="tertiary"
+                  size="small"
+                  onClick={() => fileInputRef.current?.click()}
+                  stretch
+                >
+                  📁 Or upload a .CSV file
                 </Button>
 
                 {/* Recent Spreadsheets */}
