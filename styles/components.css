@@ -1,0 +1,359 @@
+/* Main container matching Canva 350px panel constraints */
+.scrollContainer {
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+  padding: var(--ui-kit-space-200);
+  background-color: var(--ui-kit-color-surface-primary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-kit-space-200);
+}
+
+/* Header Section */
+.appHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-kit-space-50);
+  padding-bottom: var(--ui-kit-space-150);
+  border-bottom: 1px solid var(--ui-kit-color-border-subtle);
+}
+
+.headerTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Dataset Card */
+.datasetCard {
+  background-color: var(--ui-kit-color-surface-secondary);
+  border: 1px solid var(--ui-kit-color-border-subtle);
+  border-radius: var(--ui-kit-radius-container-standard);
+  padding: var(--ui-kit-space-150);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-kit-space-100);
+}
+
+.datasetHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.switcherPanel {
+  margin-top: var(--ui-kit-space-100);
+  padding: var(--ui-kit-space-100);
+  background-color: var(--ui-kit-color-surface-primary);
+  border: 1px solid var(--ui-kit-color-border-subtle);
+  border-radius: var(--ui-kit-radius-container-standard);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-kit-space-100);
+}
+
+/* Stepper / Active Row Navigator */
+.stepperContainer {
+  background-color: var(--ui-kit-color-surface-secondary);
+  border: 1px solid var(--ui-kit-color-border-subtle);
+  border-radius: var(--ui-kit-radius-container-standard);
+  padding: var(--ui-kit-space-150);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-kit-space-100);
+}
+
+.stepperControls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stepperButtons {
+  display: flex;
+  gap: 4px;
+}
+
+.itemSnapshot {
+  background-color: var(--ui-kit-color-surface-primary);
+  border: 1px solid var(--ui-kit-color-border-subtle);
+  border-radius: var(--ui-kit-radius-element-standard);
+  padding: var(--ui-kit-space-100);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.snapshotRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--ui-kit-color-border-subtle);
+}
+
+.snapshotRow:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.snapshotLabel {
+  color: var(--ui-kit-color-text-tertiary);
+  font-weight: 500;
+  font-size: 11px;
+}
+
+.snapshotValue {
+  color: var(--ui-kit-color-text-primary);
+  font-weight: 600;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Field Chips Grid */
+.fieldChipsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-kit-space-50);
+  margin-top: var(--ui-kit-space-50);
+}
+
+.fieldChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--ui-kit-radius-element-standard);
+  background-color: var(--ui-kit-color-surface-secondary);
+  border: 1px solid var(--ui-kit-color-border-subtle);
+  color: var(--ui-kit-color-text-primary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  text-align: left;
+}
+
+.fieldChip:hover {
+  background-color: var(--ui-kit-color-surface-hover);
+  border-color: var(--ui-kit-color-border-hover);
+  transform: translateY(-1px);
+}
+
+.fieldChip:active {
+  transform: translateY(0);
+}
+
+.chipTag {
+  font-weight: 600;
+}
+
+.chipPreview {
+  color: var(--ui-kit-color-text-tertiary);
+  font-size: 11px;
+}
+
+/* Action Area */
+.actionArea {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-kit-space-100);
+}
+
+/* Feedback Toast */
+.statusMessage {
+  padding: var(--ui-kit-space-100);
+  border-radius: var(--ui-kit-radius-container-standard);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: var(--ui-kit-space-100);
+}
+
+.statusMessageSuccess {
+  background-color: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #065f46;
+}
+
+.statusMessageError {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #991b1b;
+}
+
+/* Collapsible Setup Box */
+.setupAccordion {
+  background-color: var(--ui-kit-color-surface-secondary);
+  border: 1px solid var(--ui-kit-color-border-subtle);
+  border-radius: var(--ui-kit-radius-container-standard);
+  padding: var(--ui-kit-space-150);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-kit-space-150);
+}
+
+/* Recent Sheets List & OAuth */
+.recentSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-kit-space-100);
+  margin-top: var(--ui-kit-space-50);
+}
+
+.recentCard {
+  background-color: var(--ui-kit-color-surface-primary);
+  border: 1px solid var(--ui-kit-color-border-subtle);
+  border-radius: var(--ui-kit-radius-container-standard);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.recentCard:hover {
+  background-color: var(--ui-kit-color-surface-hover);
+  border-color: var(--ui-kit-color-border-hover);
+  transform: translateY(-1px);
+}
+
+.recentCardInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.recentCardTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ui-kit-color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recentCardMeta {
+  font-size: 11px;
+  color: var(--ui-kit-color-text-tertiary);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--ui-kit-color-text-tertiary);
+  font-size: 11px;
+  gap: var(--ui-kit-space-100);
+  margin: var(--ui-kit-space-50) 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--ui-kit-color-border-subtle);
+}
+
+/* Google Account Strip */
+.googleAccountStrip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background-color: var(--ui-kit-color-surface-secondary);
+  border: 1px solid var(--ui-kit-color-border-subtle);
+  border-radius: var(--ui-kit-radius-container-standard);
+}
+
+.googleAccountInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ui-kit-color-text-primary);
+}
+
+/* Tab Nav */
+.tabNav {
+  display: flex;
+  background-color: var(--ui-kit-color-surface-secondary);
+  border-radius: var(--ui-kit-radius-container-standard);
+  padding: 3px;
+  gap: 3px;
+  border: 1px solid var(--ui-kit-color-border-subtle);
+}
+
+.tabBtn {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--ui-kit-color-text-tertiary);
+  border-radius: var(--ui-kit-radius-element-standard);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.tabBtnActive {
+  background-color: var(--ui-kit-color-surface-primary);
+  color: var(--ui-kit-color-text-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Sheet Picker List */
+.sheetPickerList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.sheetPickerItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background-color: var(--ui-kit-color-surface-primary);
+  border: 1px solid var(--ui-kit-color-border-subtle);
+  border-radius: var(--ui-kit-radius-element-standard);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.sheetPickerItem:hover {
+  background-color: var(--ui-kit-color-surface-hover);
+  border-color: var(--ui-kit-color-border-hover);
+  transform: translateY(-1px);
+}
+
+.sheetItemTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ui-kit-color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sheetItemTime {
+  font-size: 11px;
+  color: var(--ui-kit-color-text-tertiary);
+}
+
+
